@@ -17,7 +17,13 @@ export type ShapeType =
   | 'sriYantra'
   | 'fibonacci'
   | 'phyllotaxis'
-  | 'treeOfLife';
+  | 'treeOfLife'
+  | 'hexagram'
+  | 'pentagram'
+  | 'cuboctahedron'
+  | 'starOfLakshmi';
+
+export type MaterialMode = 'wireframe' | 'solid' | 'glass' | 'holographic';
 
 export type ArrayMode =
   | 'none'
@@ -65,6 +71,7 @@ export interface ShapeInstance {
   color: string;
   emissive: number;
   wireframe: boolean;
+  materialMode: MaterialMode;
   opacity: number;
   detail: number;
   thickness: number;

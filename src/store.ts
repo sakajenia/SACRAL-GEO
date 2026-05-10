@@ -1,9 +1,39 @@
 import { create } from 'zustand';
-import type { ShapeInstance, ShapeType } from './lib/types';
+import type { ShapeInstance, ShapeType, MaterialMode } from './lib/types';
 import { DEFAULT_ARRAY } from './lib/types';
 import { findCatalogEntry } from './lib/catalog';
 import { ACCENT_PALETTE, pickAccent } from './lib/colors';
 import { decodeStateFromUrl, encodeStateToUrl } from './lib/urlState';
+import { THEMES, type ThemeKey, applyThemeToShapes } from './lib/themes';
+
+export type TransformMode = 'off' | 'translate' | 'rotate' | 'scale';
+
+const CUSTOM_PRESETS_KEY = 'sacral-geo-custom-presets';
+
+export interface CustomPreset {
+  id: string;
+  name: string;
+  createdAt: number;
+  snapshot: StoreSnapshot;
+}
+
+function loadCustomPresets(): CustomPreset[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_PRESETS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as CustomPreset[];
+  } catch {
+    return [];
+  }
+}
+
+function saveCustomPresets(list: CustomPreset[]) {
+  try {
+    localStorage.setItem(CUSTOM_PRESETS_KEY, JSON.stringify(list));
+  } catch {
+    /* ignore */
+  }
+}
 
 export interface Store {
   // Scene
@@ -21,6 +51,12 @@ export interface Store {
   cameraDistance: number;
   autoRotateSpeed: number;
   globalRotationMultiplier: number;
+  themeKey: ThemeKey;
+  showParticles: boolean;
+  transformMode: TransformMode;
+
+  // Persisted user presets
+  customPresets: CustomPreset[];
 
   // History
   past: StoreSnapshot[];
@@ -36,6 +72,11 @@ export interface Store {
   clearScene: () => void;
   loadPreset: (preset: PresetKey) => void;
   randomizeColors: () => void;
+  applyTheme: (key: ThemeKey) => void;
+  setTransformMode: (m: TransformMode) => void;
+  saveCustomPreset: (name: string) => void;
+  loadCustomPreset: (id: string) => void;
+  removeCustomPreset: (id: string) => void;
   setGlobal: <K extends GlobalKeys>(key: K, value: Store[K]) => void;
   syncToUrl: () => void;
   loadFromUrl: () => boolean;
@@ -56,7 +97,8 @@ type GlobalKeys =
   | 'meditationMode'
   | 'cameraDistance'
   | 'autoRotateSpeed'
-  | 'globalRotationMultiplier';
+  | 'globalRotationMultiplier'
+  | 'showParticles';
 
 export interface StoreSnapshot {
   shapes: ShapeInstance[];
@@ -70,6 +112,8 @@ export interface StoreSnapshot {
   cameraDistance: number;
   autoRotateSpeed: number;
   globalRotationMultiplier: number;
+  themeKey?: ThemeKey;
+  showParticles?: boolean;
 }
 
 export type PresetKey =
@@ -105,6 +149,7 @@ function makeShape(type: ShapeType, index: number): ShapeInstance {
     emissive: 1.6,
     wireframe: true,
     opacity: 1,
+    materialMode: 'wireframe',
     detail: 0,
     thickness: 0.012,
     showVertices: false,
@@ -130,6 +175,7 @@ function normalizeShape(s: Partial<ShapeInstance> & { id: string; type: ShapeTyp
     color: s.color ?? '#a78bfa',
     emissive: s.emissive ?? 1.6,
     wireframe: s.wireframe ?? true,
+    materialMode: (s.materialMode ?? (s.wireframe === false ? 'solid' : 'wireframe')) as MaterialMode,
     opacity: s.opacity ?? 1,
     detail: s.detail ?? 0,
     thickness: s.thickness ?? 0.012,
@@ -174,6 +220,11 @@ export const useStore = create<Store>((set, get) => ({
   cameraDistance: 5.5,
   autoRotateSpeed: 0.25,
   globalRotationMultiplier: 1,
+  themeKey: 'neon',
+  showParticles: true,
+  transformMode: 'off',
+
+  customPresets: loadCustomPresets(),
 
   past: [],
   future: [],
@@ -282,6 +333,48 @@ export const useStore = create<Store>((set, get) => ({
     get().syncToUrl();
   },
 
+  applyTheme: (key) => {
+    get().pushHistory();
+    const t = THEMES[key];
+    set((s) => ({
+      themeKey: key,
+      background: t.background,
+      bloomIntensity: t.bloomIntensity,
+      bloomRadius: t.bloomRadius,
+      shapes: applyThemeToShapes(s.shapes, t),
+    }));
+    get().syncToUrl();
+  },
+
+  setTransformMode: (m) => set({ transformMode: m }),
+
+  saveCustomPreset: (name) => {
+    const snap = get().serialize();
+    const preset: CustomPreset = {
+      id: `cp_${Date.now().toString(36)}`,
+      name: name.trim() || 'Untitled',
+      createdAt: Date.now(),
+      snapshot: snap,
+    };
+    const next = [preset, ...get().customPresets].slice(0, 30);
+    saveCustomPresets(next);
+    set({ customPresets: next });
+  },
+
+  loadCustomPreset: (id) => {
+    const preset = get().customPresets.find((p) => p.id === id);
+    if (!preset) return;
+    get().pushHistory();
+    get().hydrate(preset.snapshot);
+    get().syncToUrl();
+  },
+
+  removeCustomPreset: (id) => {
+    const next = get().customPresets.filter((p) => p.id !== id);
+    saveCustomPresets(next);
+    set({ customPresets: next });
+  },
+
   setGlobal: (key, value) => {
     set({ [key]: value } as Partial<Store>);
     get().syncToUrl();
@@ -313,6 +406,8 @@ export const useStore = create<Store>((set, get) => ({
       cameraDistance: s.cameraDistance,
       autoRotateSpeed: s.autoRotateSpeed,
       globalRotationMultiplier: s.globalRotationMultiplier,
+      themeKey: s.themeKey,
+      showParticles: s.showParticles,
     };
   },
 
@@ -330,6 +425,8 @@ export const useStore = create<Store>((set, get) => ({
       cameraDistance: snap.cameraDistance,
       autoRotateSpeed: snap.autoRotateSpeed,
       globalRotationMultiplier: snap.globalRotationMultiplier,
+      themeKey: snap.themeKey ?? 'neon',
+      showParticles: snap.showParticles ?? true,
       selectedId: shapes[0]?.id ?? null,
     });
   },

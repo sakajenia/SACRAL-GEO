@@ -49,6 +49,14 @@ export function ShapeIcon({ type, size = 36 }: { type: ShapeType; size?: number 
       return <Fib {...props} />;
     case 'phyllotaxis':
       return <Phyllo {...props} />;
+    case 'hexagram':
+      return <HexagramIcon {...props} />;
+    case 'pentagram':
+      return <PentagramIcon {...props} />;
+    case 'starOfLakshmi':
+      return <LakshmiIcon {...props} />;
+    case 'cuboctahedron':
+      return <CuboctaIcon {...props} />;
   }
 }
 
@@ -312,4 +320,54 @@ function Phyllo({ size }: IconProps) {
     );
   }
   return <Wrap size={size}>{dots}</Wrap>;
+}
+function HexagramIcon({ size }: IconProps) {
+  return (
+    <Wrap size={size}>
+      <polygon points="32,8 56,52 8,52" stroke={stroke} strokeWidth={sw} fill="none" />
+      <polygon points="32,56 8,12 56,12" stroke={stroke2} strokeWidth={sw} fill="none" />
+    </Wrap>
+  );
+}
+function PentagramIcon({ size }: IconProps) {
+  const pts: string[] = [];
+  for (let i = 0; i < 5; i++) {
+    const a = -Math.PI / 2 + (i * 2 * Math.PI) / 5;
+    pts.push(`${32 + Math.cos(a) * 24},${32 + Math.sin(a) * 24}`);
+  }
+  // Re-order to draw star with every-other
+  const star = [pts[0], pts[2], pts[4], pts[1], pts[3], pts[0]].join(' ');
+  return (
+    <Wrap size={size}>
+      <polyline points={star} stroke={stroke} strokeWidth={sw} fill="none" />
+      <circle cx="32" cy="32" r="25" stroke={stroke2} strokeWidth={0.8} fill="none" opacity={0.6} />
+    </Wrap>
+  );
+}
+function LakshmiIcon({ size }: IconProps) {
+  const sq = (rot: number) => {
+    const pts: string[] = [];
+    for (let i = 0; i < 4; i++) {
+      const a = rot + (i * Math.PI) / 2;
+      pts.push(`${32 + Math.cos(a) * 24},${32 + Math.sin(a) * 24}`);
+    }
+    return pts.join(' ');
+  };
+  return (
+    <Wrap size={size}>
+      <polygon points={sq(0)} stroke={stroke} strokeWidth={sw} fill="none" />
+      <polygon points={sq(Math.PI / 4)} stroke={stroke2} strokeWidth={sw} fill="none" />
+    </Wrap>
+  );
+}
+function CuboctaIcon({ size }: IconProps) {
+  return (
+    <Wrap size={size}>
+      <polygon points="32,6 54,18 54,42 32,54 10,42 10,18" stroke={stroke} strokeWidth={sw} fill="none" />
+      <line x1="32" y1="6" x2="32" y2="54" stroke={stroke2} strokeWidth={sw} />
+      <line x1="10" y1="18" x2="54" y2="42" stroke={stroke2} strokeWidth={sw} />
+      <line x1="54" y1="18" x2="10" y2="42" stroke={stroke2} strokeWidth={sw} />
+      <circle cx="32" cy="30" r="4" fill={stroke} />
+    </Wrap>
+  );
 }

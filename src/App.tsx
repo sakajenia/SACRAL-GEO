@@ -3,6 +3,7 @@ import { Scene } from './components/Scene';
 import { LeftPanel } from './components/ui/LeftPanel';
 import { RightPanel } from './components/ui/RightPanel';
 import { Toolbar } from './components/ui/Toolbar';
+import { HelpOverlay } from './components/ui/HelpOverlay';
 import { useStore } from './store';
 
 const ONBOARD_KEY = 'sacral-geo-onboarded-v2';
@@ -16,6 +17,9 @@ export function App() {
   const selectedId = useStore((s) => s.selectedId);
   const removeShape = useStore((s) => s.removeShape);
   const duplicateShape = useStore((s) => s.duplicateShape);
+  const setTransformMode = useStore((s) => s.setTransformMode);
+
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number | null>(null);
@@ -86,10 +90,26 @@ export function App() {
       if ((e.key === 'd' || e.key === 'D') && !mod && selectedId) {
         duplicateShape(selectedId);
       }
+      if (e.key === '?') {
+        setHelpOpen((v) => !v);
+      }
+      if (e.key === 't' || e.key === 'T') {
+        if (selectedId) setTransformMode(useStore.getState().transformMode === 'translate' ? 'off' : 'translate');
+      }
+      if (e.key === 'r' || e.key === 'R') {
+        if (selectedId) setTransformMode(useStore.getState().transformMode === 'rotate' ? 'off' : 'rotate');
+      }
+      if (e.key === 's' || e.key === 'S') {
+        if (selectedId) setTransformMode(useStore.getState().transformMode === 'scale' ? 'off' : 'scale');
+      }
+      if (e.key === 'Escape') {
+        setTransformMode('off');
+        setHelpOpen(false);
+      }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [setGlobal, undo, redo, selectedId, removeShape, duplicateShape]);
+  }, [setGlobal, undo, redo, selectedId, removeShape, duplicateShape, setTransformMode]);
 
   function showToast(msg: string) {
     setToastMsg(msg);
@@ -104,7 +124,7 @@ export function App() {
       <div className="canvas-wrap">
         <Scene />
 
-        <Toolbar toast={showToast} />
+        <Toolbar toast={showToast} onHelp={() => setHelpOpen((v) => !v)} />
 
         <button
           className="mobile-toggle left"
@@ -142,6 +162,8 @@ export function App() {
         )}
 
         {toastMsg && <div className="toast">{toastMsg}</div>}
+
+        {helpOpen && <HelpOverlay onClose={() => setHelpOpen(false)} />}
       </div>
 
       <RightPanel toast={showToast} collapsed={rightCollapsed} />

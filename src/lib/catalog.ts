@@ -45,6 +45,11 @@ export const CATALOG: ShapeCatalogEntry[] = [
   { type: 'torusKnot',    label: 'Torus Knot',   group: 'spiral',   description: '(p,q)-torus knot — woven flow lines.',           defaults: { detail: 1 }, capabilities: SOLID_CAPS },
   { type: 'fibonacci',    label: 'Golden Spiral',group: 'spiral',   description: 'Phi-based logarithmic spiral.',                  defaults: { detail: 2 }, capabilities: DETAILED_RING_CAPS },
   { type: 'phyllotaxis',  label: 'Phyllotaxis',  group: 'spiral',   description: 'Sunflower seed packing using the golden angle.', defaults: { detail: 2 }, capabilities: DETAILED_RING_CAPS },
+  // Stars & 6-fold symmetry
+  { type: 'hexagram',      label: 'Hexagram',      group: 'symbol', description: 'Star of David — two interlocking triangles.',  defaults: {},            capabilities: RING_CAPS },
+  { type: 'pentagram',     label: 'Pentagram',     group: 'symbol', description: '5-pointed star — phi-encoded sacred star.',    defaults: {},            capabilities: RING_CAPS },
+  { type: 'starOfLakshmi', label: 'Star of Lakshmi',group:'symbol', description: '8-pointed octagram — two overlapping squares.',defaults: {},            capabilities: RING_CAPS },
+  { type: 'cuboctahedron', label: 'Vector Equilibrium',group:'platonic',description:'Cuboctahedron — Bucky\'s perfect balance.',defaults: { detail: 0 }, capabilities: SOLID_CAPS },
 ];
 
 export const CATALOG_GROUPS: Array<{ key: string; label: string }> = [

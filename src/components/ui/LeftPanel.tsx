@@ -28,6 +28,10 @@ export function LeftPanel({ collapsed = false }: { collapsed?: boolean }) {
   const updateShape = useStore((s) => s.updateShape);
   const loadPreset = useStore((s) => s.loadPreset);
   const clearScene = useStore((s) => s.clearScene);
+  const customPresets = useStore((s) => s.customPresets);
+  const saveCustomPreset = useStore((s) => s.saveCustomPreset);
+  const loadCustomPreset = useStore((s) => s.loadCustomPreset);
+  const removeCustomPreset = useStore((s) => s.removeCustomPreset);
 
   const [tab, setTab] = useState<'add' | 'scene' | 'presets'>('scene');
   const [search, setSearch] = useState('');
@@ -232,6 +236,41 @@ export function LeftPanel({ collapsed = false }: { collapsed?: boolean }) {
                 </button>
               ))}
             </div>
+
+            <div className="section-title">Your creations</div>
+            <button
+              className="btn primary"
+              style={{ width: '100%' }}
+              onClick={() => {
+                const name = window.prompt('Name this configuration', `Scene ${customPresets.length + 1}`);
+                if (name !== null) saveCustomPreset(name);
+              }}
+            >
+              Save current scene
+            </button>
+            {customPresets.length === 0 ? (
+              <p className="empty-hint" style={{ marginTop: 10 }}>
+                No saved scenes yet — tap above to bookmark the current configuration.
+              </p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+                {customPresets.map((p) => (
+                  <div key={p.id} className="scene-item">
+                    <span className="name" style={{ cursor: 'pointer' }} onClick={() => {
+                      loadCustomPreset(p.id);
+                      setTab('scene');
+                    }}>{p.name}</span>
+                    <button
+                      className="icon-btn danger"
+                      title="Remove"
+                      onClick={() => removeCustomPreset(p.id)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

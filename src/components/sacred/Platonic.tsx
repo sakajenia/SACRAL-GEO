@@ -37,6 +37,7 @@ export function Platonic({ type, shape }: Props) {
       color={shape.color}
       emissive={shape.emissive}
       wireframe={shape.wireframe}
+      materialMode={shape.materialMode}
       opacity={shape.opacity}
       showVertices={shape.showVertices}
     />

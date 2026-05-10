@@ -4,7 +4,7 @@ import { CHAKRAS } from '../../lib/colors';
 import { Slider, Toggle, ColorField, SectionTitle, SelectField, Segmented } from './Primitives';
 import { ShapeIcon } from './ShapeIcons';
 import { findCatalogEntry } from '../../lib/catalog';
-import type { ShapeInstance, ArrayMode, AxisKey, ArrayConfig } from '../../lib/types';
+import type { ShapeInstance, ArrayMode, AxisKey, ArrayConfig, MaterialMode } from '../../lib/types';
 import { AXES } from '../../lib/types';
 import { exportPng, copyShareLink } from '../../lib/exports';
 import { computeArray } from '../../lib/array';
@@ -236,11 +236,21 @@ function MaterialTab({
         Tap a chakra hue to align the form with its Solfeggio frequency.
       </p>
 
+      {caps.wireframe && (
+        <SelectField<MaterialMode>
+          label="Surface"
+          value={shape.materialMode}
+          options={[
+            { value: 'wireframe', label: 'Wireframe — emissive lines' },
+            { value: 'solid', label: 'Solid — emissive surface' },
+            { value: 'glass', label: 'Glass — refractive crystal' },
+            { value: 'holographic', label: 'Holographic — iridescent' },
+          ]}
+          onChange={(v) => onChange({ materialMode: v, wireframe: v === 'wireframe' })}
+        />
+      )}
       <Slider label="Glow" value={shape.emissive} min={0} max={4} step={0.05} onChange={(v) => onChange({ emissive: v })} />
       <Slider label="Opacity" value={shape.opacity} min={0.05} max={1} step={0.01} onChange={(v) => onChange({ opacity: v })} />
-      {caps.wireframe && (
-        <Toggle label="Wireframe" value={shape.wireframe} onChange={(v) => onChange({ wireframe: v })} />
-      )}
       {caps.thickness && (
         <Slider label="Line thickness" value={shape.thickness} min={0.003} max={0.06} step={0.001} onChange={(v) => onChange({ thickness: v })} />
       )}

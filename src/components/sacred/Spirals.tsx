@@ -23,6 +23,7 @@ export function Torus({ shape }: Props) {
       color={shape.color}
       emissive={shape.emissive}
       wireframe={shape.wireframe}
+      materialMode={shape.materialMode}
       opacity={shape.opacity}
       showVertices={shape.showVertices}
     />
@@ -43,6 +44,7 @@ export function TorusKnot({ shape }: Props) {
       color={shape.color}
       emissive={shape.emissive}
       wireframe={shape.wireframe}
+      materialMode={shape.materialMode}
       opacity={shape.opacity}
       showVertices={shape.showVertices}
     />

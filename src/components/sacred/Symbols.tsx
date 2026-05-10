@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { Solid } from './Solid';
 import type { ShapeInstance } from '../../lib/types';
 
-const { PI, sin, cos } = Math;
+const { PI, sin, cos, sqrt } = Math;
 
 interface Props {
   shape: ShapeInstance;
@@ -20,6 +20,7 @@ export function Merkaba({ shape }: Props) {
           color={shape.color}
           emissive={shape.emissive}
           wireframe={shape.wireframe}
+          materialMode={shape.materialMode}
           opacity={shape.opacity * 0.85}
           showVertices={shape.showVertices}
         />
@@ -30,6 +31,7 @@ export function Merkaba({ shape }: Props) {
           color={shape.color}
           emissive={shape.emissive}
           wireframe={shape.wireframe}
+          materialMode={shape.materialMode}
           opacity={shape.opacity * 0.85}
           showVertices={shape.showVertices}
         />
@@ -210,3 +212,201 @@ export function TreeOfLife({ shape }: Props) {
   );
 }
 
+function Ring2D({
+  cx,
+  cy,
+  cz,
+  radius,
+  tube,
+  color,
+  emissive,
+  opacity,
+  axis = 'z',
+}: {
+  cx: number;
+  cy: number;
+  cz: number;
+  radius: number;
+  tube: number;
+  color: string;
+  emissive: number;
+  opacity: number;
+  axis?: 'x' | 'y' | 'z';
+}) {
+  const rotation: [number, number, number] =
+    axis === 'z' ? [0, 0, 0] : axis === 'x' ? [0, PI / 2, 0] : [PI / 2, 0, 0];
+  return (
+    <mesh position={[cx, cy, cz]} rotation={rotation}>
+      <torusGeometry args={[radius, tube, 12, 96]} />
+      <meshStandardMaterial
+        color={color}
+        emissive={color}
+        emissiveIntensity={emissive}
+        transparent={opacity < 1}
+        opacity={opacity}
+        roughness={0.3}
+        metalness={0.2}
+        toneMapped={false}
+      />
+    </mesh>
+  );
+}
+
+export function Hexagram({ shape }: Props) {
+  const tube = Math.max(0.005, shape.thickness);
+  const lineGeom = useMemo(() => {
+    const positions: number[] = [];
+    const r = 1.0;
+    const up: [number, number][] = [
+      [0, r],
+      [r * 0.866, -r * 0.5],
+      [-r * 0.866, -r * 0.5],
+    ];
+    const down: [number, number][] = [
+      [0, -r],
+      [r * 0.866, r * 0.5],
+      [-r * 0.866, r * 0.5],
+    ];
+    for (const tri of [up, down]) {
+      for (let i = 0; i < 3; i++) {
+        const a = tri[i];
+        const b = tri[(i + 1) % 3];
+        positions.push(a[0], a[1], 0, b[0], b[1], 0);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    return g;
+  }, []);
+
+  return (
+    <group>
+      <lineSegments geometry={lineGeom}>
+        <lineBasicMaterial color={shape.color} transparent opacity={shape.opacity} toneMapped={false} />
+      </lineSegments>
+      <Ring2D
+        cx={0}
+        cy={0}
+        cz={0}
+        radius={1.05}
+        tube={tube * 0.6}
+        color={shape.color}
+        emissive={shape.emissive * 0.7}
+        opacity={shape.opacity * 0.45}
+      />
+    </group>
+  );
+}
+
+export function Pentagram({ shape }: Props) {
+  const tube = Math.max(0.005, shape.thickness);
+  const lineGeom = useMemo(() => {
+    const positions: number[] = [];
+    const r = 1.0;
+    const points: [number, number][] = [];
+    for (let i = 0; i < 5; i++) {
+      const a = -PI / 2 + (i * 2 * PI) / 5;
+      points.push([cos(a) * r, sin(a) * r]);
+    }
+    // Connect every second point to form the star
+    for (let i = 0; i < 5; i++) {
+      const A = points[i];
+      const B = points[(i + 2) % 5];
+      positions.push(A[0], A[1], 0, B[0], B[1], 0);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    return g;
+  }, []);
+
+  return (
+    <group>
+      <lineSegments geometry={lineGeom}>
+        <lineBasicMaterial color={shape.color} transparent opacity={shape.opacity} toneMapped={false} />
+      </lineSegments>
+      <Ring2D
+        cx={0}
+        cy={0}
+        cz={0}
+        radius={1.02}
+        tube={tube * 0.6}
+        color={shape.color}
+        emissive={shape.emissive * 0.7}
+        opacity={shape.opacity * 0.45}
+      />
+    </group>
+  );
+}
+
+export function StarOfLakshmi({ shape }: Props) {
+  const lineGeom = useMemo(() => {
+    const positions: number[] = [];
+    const r = 1.0;
+    for (const rot of [0, PI / 4]) {
+      const verts: [number, number][] = [];
+      for (let i = 0; i < 4; i++) {
+        const a = rot + (i * PI) / 2;
+        verts.push([cos(a) * r, sin(a) * r]);
+      }
+      for (let i = 0; i < 4; i++) {
+        const a = verts[i];
+        const b = verts[(i + 1) % 4];
+        positions.push(a[0], a[1], 0, b[0], b[1], 0);
+      }
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    return g;
+  }, []);
+  return (
+    <lineSegments geometry={lineGeom}>
+      <lineBasicMaterial color={shape.color} transparent opacity={shape.opacity} toneMapped={false} />
+    </lineSegments>
+  );
+}
+
+export function Cuboctahedron({ shape }: Props) {
+  const geometry = useMemo(() => {
+    // 12 vertices of the cuboctahedron — Buckminster Fuller's vector equilibrium
+    const k = 1 / sqrt(2);
+    const v: [number, number, number][] = [
+      [k, k, 0], [k, -k, 0], [-k, k, 0], [-k, -k, 0],
+      [k, 0, k], [k, 0, -k], [-k, 0, k], [-k, 0, -k],
+      [0, k, k], [0, k, -k], [0, -k, k], [0, -k, -k],
+    ];
+    // 8 triangular faces + 6 square faces
+    const triangles: [number, number, number][] = [
+      [0, 4, 8], [0, 5, 9], [1, 4, 10], [1, 5, 11],
+      [2, 6, 8], [2, 7, 9], [3, 6, 10], [3, 7, 11],
+    ];
+    const squares: [number, number, number, number][] = [
+      [0, 4, 1, 5], [2, 6, 3, 7],
+      [0, 8, 2, 9], [1, 10, 3, 11],
+      [4, 8, 6, 10], [5, 9, 7, 11],
+    ];
+    const positions: number[] = [];
+    for (const [a, b, c] of triangles) {
+      positions.push(...v[a], ...v[b], ...v[c]);
+    }
+    for (const [a, b, c, d] of squares) {
+      positions.push(...v[a], ...v[b], ...v[c]);
+      positions.push(...v[a], ...v[c], ...v[d]);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    g.computeVertexNormals();
+    return g;
+  }, []);
+
+  return (
+    <Solid
+      geometry={geometry}
+      color={shape.color}
+      emissive={shape.emissive}
+      wireframe={shape.wireframe}
+      materialMode={shape.materialMode}
+      opacity={shape.opacity}
+      showVertices={shape.showVertices}
+    />
+  );
+}

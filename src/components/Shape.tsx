@@ -11,7 +11,15 @@ import {
   FruitOfLife,
   MetatronsCube,
 } from './sacred/Patterns';
-import { Merkaba, SriYantra, TreeOfLife } from './sacred/Symbols';
+import {
+  Merkaba,
+  SriYantra,
+  TreeOfLife,
+  Hexagram,
+  Pentagram,
+  StarOfLakshmi,
+  Cuboctahedron,
+} from './sacred/Symbols';
 import { Torus, TorusKnot, FibonacciSpiral, Phyllotaxis } from './sacred/Spirals';
 import { useStore } from '../store';
 import { computeArray, ARRAY_HARD_CAP, type ArrayItem } from '../lib/array';
@@ -55,6 +63,14 @@ function ShapeBody({ shape }: Props) {
       return <FibonacciSpiral shape={shape} />;
     case 'phyllotaxis':
       return <Phyllotaxis shape={shape} />;
+    case 'hexagram':
+      return <Hexagram shape={shape} />;
+    case 'pentagram':
+      return <Pentagram shape={shape} />;
+    case 'starOfLakshmi':
+      return <StarOfLakshmi shape={shape} />;
+    case 'cuboctahedron':
+      return <Cuboctahedron shape={shape} />;
     default:
       return null;
   }
@@ -156,7 +172,7 @@ export function Shape({ shape }: Props) {
   if (!shape.visible) return null;
 
   return (
-    <group position={shape.position}>
+    <group position={shape.position} userData={{ shapeId: shape.id }}>
       <group position={shape.anchor}>
         {isSelected && (
           <mesh>

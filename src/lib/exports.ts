@@ -1,10 +1,13 @@
 import * as THREE from 'three';
+import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
 import type { StoreSnapshot } from '../store';
 import { buildShareUrl } from './urlState';
 
 declare global {
   interface Window {
     __sacralRenderer?: THREE.WebGLRenderer;
+    __sacralScene?: THREE.Scene;
+    __sacralCamera?: THREE.Camera;
   }
 }
 
@@ -63,4 +66,47 @@ function timestamp(): string {
 export async function copyShareLink(snap: StoreSnapshot): Promise<void> {
   const url = buildShareUrl(snap);
   await navigator.clipboard.writeText(url);
+}
+
+export function exportGLB(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const scene = window.__sacralScene;
+    if (!scene) return reject(new Error('scene not ready'));
+
+    const exporter = new GLTFExporter();
+    exporter.parse(
+      scene,
+      (result) => {
+        const data = result as ArrayBuffer;
+        const blob = new Blob([data], { type: 'model/gltf-binary' });
+        const url = URL.createObjectURL(blob);
+        triggerDownload(url, `sacral-geo-${timestamp()}.glb`);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+        resolve();
+      },
+      (err) => reject(new Error(String(err))),
+      { binary: true, onlyVisible: true, embedImages: true },
+    );
+  });
+}
+
+export function setCameraPreset(angle: 'front' | 'side' | 'top' | 'iso'): void {
+  const camera = window.__sacralCamera;
+  if (!camera) return;
+  const distance = 5.5;
+  switch (angle) {
+    case 'front':
+      camera.position.set(0, 0, distance);
+      break;
+    case 'side':
+      camera.position.set(distance, 0, 0);
+      break;
+    case 'top':
+      camera.position.set(0, distance, 0.0001);
+      break;
+    case 'iso':
+      camera.position.set(distance * 0.7, distance * 0.6, distance * 0.7);
+      break;
+  }
+  camera.lookAt(0, 0, 0);
 }
