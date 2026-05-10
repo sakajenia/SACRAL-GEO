@@ -70,6 +70,7 @@ export type PresetKey =
   | 'platonic-spin'
   | 'sri-portal'
   | 'cosmic-egg'
+  | 'flower-revolve'
   | 'flower-sphere'
   | 'merkaba-lattice'
   | 'helix-of-life'
@@ -147,9 +148,11 @@ function defaultShapes(): ShapeInstance[] {
   return [flower, merkaba];
 }
 
+const initialShapes = defaultShapes();
+
 export const useStore = create<Store>((set, get) => ({
-  shapes: defaultShapes(),
-  selectedId: null,
+  shapes: initialShapes,
+  selectedId: initialShapes[0]?.id ?? null,
 
   bloomIntensity: 1.4,
   bloomRadius: 0.7,
@@ -219,7 +222,7 @@ export const useStore = create<Store>((set, get) => ({
 
   loadPreset: (preset) => {
     const shapes = buildPreset(preset);
-    set({ shapes, selectedId: null });
+    set({ shapes, selectedId: shapes[0]?.id ?? null });
     get().syncToUrl();
   },
 
@@ -258,8 +261,9 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   hydrate: (snap) => {
+    const shapes = snap.shapes.map((s) => normalizeShape(s));
     set({
-      shapes: snap.shapes.map((s) => normalizeShape(s)),
+      shapes,
       bloomIntensity: snap.bloomIntensity,
       bloomRadius: snap.bloomRadius,
       background: snap.background,
@@ -270,7 +274,7 @@ export const useStore = create<Store>((set, get) => ({
       cameraDistance: snap.cameraDistance,
       autoRotateSpeed: snap.autoRotateSpeed,
       globalRotationMultiplier: snap.globalRotationMultiplier,
-      selectedId: null,
+      selectedId: shapes[0]?.id ?? null,
     });
   },
 }));
@@ -343,8 +347,26 @@ function buildPreset(key: PresetKey): ShapeInstance[] {
       sphere.rotationSpeed = [0, 0.05, 0];
       return [sphere, egg];
     }
+    case 'flower-revolve': {
+      // 2D Flower of Life revolved around its own axis to form a 3D sphere
+      const flower = makeShape('flowerOfLife', 0);
+      flower.color = '#a78bfa';
+      flower.scale = 1.4;
+      flower.opacity = 0.6;
+      flower.rotationSpeed = [0, 0.15, 0];
+      flower.detail = 2;
+      flower.array = {
+        ...DEFAULT_ARRAY,
+        mode: 'revolve',
+        count: 18,
+        axis: 'y',
+        sweep: Math.PI,
+        faceOutward: false,
+      };
+      return [flower];
+    }
     case 'flower-sphere': {
-      // Sphere of Flowers of Life — your "sphere full of flower of life"
+      // Sphere of Flowers of Life — Fibonacci sphere of mini flowers
       const flower = makeShape('flowerOfLife', 0);
       flower.color = '#a78bfa';
       flower.scale = 0.45;

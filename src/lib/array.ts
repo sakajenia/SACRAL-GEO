@@ -191,6 +191,29 @@ export function computeArray(cfg: ArrayConfig): ArrayItem[] {
       }
       break;
     }
+
+    case 'revolve': {
+      // Lathe / revolve: N copies at the SAME position, each rotated around the
+      // chosen axis. A flat 2D form (e.g. Flower of Life) swept around its own
+      // centre fills out a 3D sphere-like envelope of intersecting copies.
+      const ax = axisVec(cfg.axis);
+      const sweep = cfg.sweep;
+      // If sweep is a full 2π and count > 1, last copy would overlap the first;
+      // step by sweep/count so they're evenly spread. For partial sweeps step by
+      // sweep/(count-1) so the endpoints are inclusive.
+      const isFull = Math.abs(Math.abs(sweep) - Math.PI * 2) < 1e-3;
+      const denom = isFull ? safeCount : Math.max(1, safeCount - 1);
+      for (let i = 0; i < safeCount; i++) {
+        const angle = (i * sweep) / denom;
+        const q = new THREE.Quaternion().setFromAxisAngle(ax, angle);
+        items.push({
+          offset: new THREE.Vector3(0, 0, 0),
+          quaternion: applyTwist(q, cfg.twist * i, FORWARD),
+          scaleMul: 1,
+        });
+      }
+      break;
+    }
   }
 
   return items;

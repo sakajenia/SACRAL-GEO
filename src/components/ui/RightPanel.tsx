@@ -224,6 +224,7 @@ function ShapeEditor({
 
 const MODE_OPTIONS: { value: ArrayMode; label: string }[] = [
   { value: 'none', label: 'Off' },
+  { value: 'revolve', label: 'Revolve / Lathe (spin around axis)' },
   { value: 'linear', label: 'Linear' },
   { value: 'polar', label: 'Polar ring' },
   { value: 'spherical', label: 'Spherical' },
@@ -250,12 +251,13 @@ function ArrayEditor({
   onAnchor: (a: [number, number, number]) => void;
 }) {
   const liveCount = computeArray(array).length;
-  const showAxis = ['linear', 'polar', 'helix', 'disc'].includes(array.mode);
+  const showAxis = ['linear', 'polar', 'helix', 'disc', 'revolve'].includes(array.mode);
   const showRadius = ['polar', 'spherical', 'helix'].includes(array.mode);
   const showSpacing = ['linear', 'cubic', 'disc'].includes(array.mode);
-  const showCount = ['linear', 'polar', 'spherical', 'helix', 'disc'].includes(array.mode);
+  const showCount = ['linear', 'polar', 'spherical', 'helix', 'disc', 'revolve'].includes(array.mode);
   const isCubic = array.mode === 'cubic';
   const isHelix = array.mode === 'helix';
+  const isRevolve = array.mode === 'revolve';
   const showFalloff = ['linear', 'cubic', 'helix', 'disc'].includes(array.mode);
 
   return (
@@ -355,6 +357,17 @@ function ArrayEditor({
                 onChange={(v) => onArray({ height: v })}
               />
             </>
+          )}
+          {isRevolve && (
+            <Slider
+              label="Sweep"
+              value={array.sweep}
+              min={0.1}
+              max={Math.PI * 2}
+              step={0.01}
+              format={(v) => `${((v * 180) / Math.PI).toFixed(0)}°`}
+              onChange={(v) => onArray({ sweep: v })}
+            />
           )}
           <Toggle
             label="Face outward"

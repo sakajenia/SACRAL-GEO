@@ -26,7 +26,8 @@ export type ArrayMode =
   | 'spherical'
   | 'cubic'
   | 'helix'
-  | 'disc';
+  | 'disc'
+  | 'revolve';
 
 export type AxisKey = 'x' | 'y' | 'z';
 
@@ -35,12 +36,13 @@ export interface ArrayConfig {
   count: number;        // total copies (>=1)
   radius: number;       // for polar/spherical/helix
   spacing: number;      // for linear/cubic/disc
-  axis: AxisKey;        // for linear/polar/helix
+  axis: AxisKey;        // for linear/polar/helix/revolve
   countX: number;       // for cubic
   countY: number;
   countZ: number;
   height: number;       // for helix (along axis)
   turns: number;        // for helix (number of revolutions)
+  sweep: number;        // for revolve: total sweep angle in radians (default 2π)
   faceOutward: boolean; // orient toward / away from anchor
   scaleFalloff: number; // -1..1 — outer copies shrink (>0) or grow (<0)
   twist: number;        // additional rotation per copy along its axis (radians)
@@ -81,6 +83,7 @@ export const DEFAULT_ARRAY: ArrayConfig = {
   countZ: 3,
   height: 2,
   turns: 2,
+  sweep: Math.PI * 2,
   faceOutward: true,
   scaleFalloff: 0,
   twist: 0,
