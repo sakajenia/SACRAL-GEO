@@ -10,6 +10,10 @@ const PRESETS: { key: import('../../store').PresetKey; label: string; subtitle: 
   { key: 'platonic-spin', label: 'Platonic Orbit', subtitle: 'All 5 platonic solids dancing' },
   { key: 'sri-portal', label: 'Sri Portal', subtitle: 'Yantra over flower of life' },
   { key: 'cosmic-egg', label: 'Cosmic Egg', subtitle: 'Egg of life within a sphere' },
+  { key: 'flower-sphere', label: 'Sphere of Flowers', subtitle: '60 flowers on a Fibonacci sphere' },
+  { key: 'merkaba-lattice', label: 'Merkaba Lattice', subtitle: '4×4×4 crystal of merkabas' },
+  { key: 'helix-of-life', label: 'Helix of Life', subtitle: 'Seed of life spiraling through space' },
+  { key: 'golden-mandala', label: 'Golden Mandala', subtitle: '89 tetrahedra on the golden disc' },
 ];
 
 export function LeftPanel({ collapsed = false }: { collapsed?: boolean }) {

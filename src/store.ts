@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { ShapeInstance, ShapeType } from './lib/types';
+import { DEFAULT_ARRAY } from './lib/types';
 import { findCatalogEntry } from './lib/catalog';
 import { pickAccent } from './lib/colors';
 import { decodeStateFromUrl, encodeStateToUrl } from './lib/urlState';
@@ -68,7 +69,11 @@ export type PresetKey =
   | 'metatron-stack'
   | 'platonic-spin'
   | 'sri-portal'
-  | 'cosmic-egg';
+  | 'cosmic-egg'
+  | 'flower-sphere'
+  | 'merkaba-lattice'
+  | 'helix-of-life'
+  | 'golden-mandala';
 
 let idCounter = 0;
 const newId = () => `s_${Date.now().toString(36)}_${(idCounter++).toString(36)}`;
@@ -94,8 +99,35 @@ function makeShape(type: ShapeType, index: number): ShapeInstance {
     detail: 0,
     thickness: 0.012,
     showVertices: false,
+    anchor: [0, 0, 0],
+    array: { ...DEFAULT_ARRAY },
   };
   return { ...base, ...entry.defaults } as ShapeInstance;
+}
+
+function normalizeShape(s: Partial<ShapeInstance> & { id: string; type: ShapeType }): ShapeInstance {
+  return {
+    id: s.id,
+    type: s.type,
+    name: s.name ?? findCatalogEntry(s.type).label,
+    visible: s.visible ?? true,
+    position: s.position ?? [0, 0, 0],
+    rotation: s.rotation ?? [0, 0, 0],
+    rotationSpeed: s.rotationSpeed ?? [0, 0.2, 0],
+    scale: s.scale ?? 1,
+    pulseAmplitude: s.pulseAmplitude ?? 0,
+    pulseSpeed: s.pulseSpeed ?? 0.5,
+    breathing: s.breathing ?? false,
+    color: s.color ?? '#a78bfa',
+    emissive: s.emissive ?? 1.6,
+    wireframe: s.wireframe ?? true,
+    opacity: s.opacity ?? 1,
+    detail: s.detail ?? 0,
+    thickness: s.thickness ?? 0.012,
+    showVertices: s.showVertices ?? false,
+    anchor: s.anchor ?? [0, 0, 0],
+    array: { ...DEFAULT_ARRAY, ...(s.array ?? {}) },
+  };
 }
 
 function defaultShapes(): ShapeInstance[] {
@@ -227,7 +259,7 @@ export const useStore = create<Store>((set, get) => ({
 
   hydrate: (snap) => {
     set({
-      shapes: snap.shapes,
+      shapes: snap.shapes.map((s) => normalizeShape(s)),
       bloomIntensity: snap.bloomIntensity,
       bloomRadius: snap.bloomRadius,
       background: snap.background,
@@ -310,6 +342,76 @@ function buildPreset(key: PresetKey): ShapeInstance[] {
       sphere.detail = 1;
       sphere.rotationSpeed = [0, 0.05, 0];
       return [sphere, egg];
+    }
+    case 'flower-sphere': {
+      // Sphere of Flowers of Life — your "sphere full of flower of life"
+      const flower = makeShape('flowerOfLife', 0);
+      flower.color = '#a78bfa';
+      flower.scale = 0.45;
+      flower.opacity = 0.85;
+      flower.rotationSpeed = [0, 0.25, 0];
+      flower.detail = 2;
+      flower.array = {
+        ...DEFAULT_ARRAY,
+        mode: 'spherical',
+        count: 60,
+        radius: 2.4,
+        faceOutward: true,
+      };
+      return [flower];
+    }
+    case 'merkaba-lattice': {
+      const m = makeShape('merkaba', 0);
+      m.color = '#06b6d4';
+      m.scale = 0.32;
+      m.rotationSpeed = [0.4, 0.6, 0.2];
+      m.array = {
+        ...DEFAULT_ARRAY,
+        mode: 'cubic',
+        countX: 4,
+        countY: 4,
+        countZ: 4,
+        spacing: 1,
+        faceOutward: false,
+        scaleFalloff: 0.35,
+      };
+      return [m];
+    }
+    case 'helix-of-life': {
+      const seed = makeShape('seedOfLife', 0);
+      seed.color = '#facc15';
+      seed.scale = 0.45;
+      seed.opacity = 0.9;
+      seed.rotationSpeed = [0, 0.6, 0];
+      seed.array = {
+        ...DEFAULT_ARRAY,
+        mode: 'helix',
+        count: 24,
+        radius: 1.4,
+        height: 4.5,
+        turns: 3,
+        axis: 'y',
+        faceOutward: true,
+        twist: Math.PI / 6,
+      };
+      return [seed];
+    }
+    case 'golden-mandala': {
+      const tetra = makeShape('tetrahedron', 0);
+      tetra.color = '#ec4899';
+      tetra.scale = 0.22;
+      tetra.rotationSpeed = [0.3, 0.4, 0];
+      tetra.array = {
+        ...DEFAULT_ARRAY,
+        mode: 'disc',
+        count: 89,
+        spacing: 0.18,
+        axis: 'y',
+        faceOutward: true,
+        scaleFalloff: 0.5,
+        twist: Math.PI / 7,
+      };
+      return [tetra];
     }
   }
 }

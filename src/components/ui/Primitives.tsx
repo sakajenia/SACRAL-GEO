@@ -69,3 +69,57 @@ interface SectionTitleProps {
 export function SectionTitle({ children }: SectionTitleProps) {
   return <div className="section-title">{children}</div>;
 }
+
+interface SelectFieldProps<T extends string> {
+  label: string;
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (v: T) => void;
+}
+
+export function SelectField<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: SelectFieldProps<T>) {
+  return (
+    <div className="field">
+      <label style={{ marginBottom: 4 }}>{label}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value as T)}>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+interface SegmentedProps<T extends string> {
+  label?: string;
+  value: T;
+  options: { value: T; label: string }[];
+  onChange: (v: T) => void;
+}
+
+export function Segmented<T extends string>({ label, value, options, onChange }: SegmentedProps<T>) {
+  return (
+    <div className="field">
+      {label && <label style={{ marginBottom: 4 }}>{label}</label>}
+      <div className="segmented">
+        {options.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            className={value === o.value ? 'on' : ''}
+            onClick={() => onChange(o.value)}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

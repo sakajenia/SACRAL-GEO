@@ -401,6 +401,49 @@ select {
   padding: 0;
 }
 
+.field select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%),
+    linear-gradient(135deg, var(--text-dim) 50%, transparent 50%);
+  background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 24px;
+}
+
+.segmented {
+  display: flex;
+  border: 1px solid var(--panel-border);
+  border-radius: 7px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.segmented button {
+  flex: 1;
+  padding: 6px 4px;
+  font-size: 11px;
+  color: var(--text-dim);
+  border-right: 1px solid var(--panel-border);
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.segmented button:last-child {
+  border-right: none;
+}
+
+.segmented button:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
+.segmented button.on {
+  background: rgba(167, 139, 250, 0.22);
+  color: var(--text);
+  text-shadow: 0 0 6px rgba(167, 139, 250, 0.6);
+}
+
 .toggle-row {
   display: flex;
   align-items: center;

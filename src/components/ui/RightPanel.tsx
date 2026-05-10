@@ -1,10 +1,11 @@
 import { useStore } from '../../store';
 import { CHAKRAS } from '../../lib/colors';
-import { Slider, Toggle, ColorField, SectionTitle } from './Primitives';
+import { Slider, Toggle, ColorField, SectionTitle, SelectField, Segmented } from './Primitives';
 import { ShapeIcon } from './ShapeIcons';
 import { findCatalogEntry } from '../../lib/catalog';
-import type { ShapeInstance } from '../../lib/types';
+import type { ShapeInstance, ArrayMode, AxisKey, ArrayConfig } from '../../lib/types';
 import { exportPng, copyShareLink } from '../../lib/exports';
+import { computeArray } from '../../lib/array';
 
 interface ToastSetter {
   (msg: string): void;
@@ -210,7 +211,195 @@ function ShapeEditor({
         value={shape.showVertices}
         onChange={(v) => onChange({ showVertices: v })}
       />
+
+      <ArrayEditor
+        array={shape.array}
+        anchor={shape.anchor}
+        onArray={(p) => onChange({ array: { ...shape.array, ...p } })}
+        onAnchor={(a) => onChange({ anchor: a })}
+      />
     </div>
+  );
+}
+
+const MODE_OPTIONS: { value: ArrayMode; label: string }[] = [
+  { value: 'none', label: 'Off' },
+  { value: 'linear', label: 'Linear' },
+  { value: 'polar', label: 'Polar ring' },
+  { value: 'spherical', label: 'Spherical' },
+  { value: 'cubic', label: 'Cubic lattice' },
+  { value: 'helix', label: 'Helix' },
+  { value: 'disc', label: 'Golden disc' },
+];
+
+const AXIS_OPTIONS: { value: AxisKey; label: string }[] = [
+  { value: 'x', label: 'X' },
+  { value: 'y', label: 'Y' },
+  { value: 'z', label: 'Z' },
+];
+
+function ArrayEditor({
+  array,
+  anchor,
+  onArray,
+  onAnchor,
+}: {
+  array: ArrayConfig;
+  anchor: [number, number, number];
+  onArray: (p: Partial<ArrayConfig>) => void;
+  onAnchor: (a: [number, number, number]) => void;
+}) {
+  const liveCount = computeArray(array).length;
+  const showAxis = ['linear', 'polar', 'helix', 'disc'].includes(array.mode);
+  const showRadius = ['polar', 'spherical', 'helix'].includes(array.mode);
+  const showSpacing = ['linear', 'cubic', 'disc'].includes(array.mode);
+  const showCount = ['linear', 'polar', 'spherical', 'helix', 'disc'].includes(array.mode);
+  const isCubic = array.mode === 'cubic';
+  const isHelix = array.mode === 'helix';
+  const showFalloff = ['linear', 'cubic', 'helix', 'disc'].includes(array.mode);
+
+  return (
+    <>
+      <SectionTitle>Repeat / Array {liveCount > 1 ? `· ${liveCount} copies` : ''}</SectionTitle>
+      <SelectField<ArrayMode>
+        label="Mode"
+        value={array.mode}
+        options={MODE_OPTIONS}
+        onChange={(v) => onArray({ mode: v })}
+      />
+
+      {array.mode !== 'none' && (
+        <>
+          {showCount && (
+            <Slider
+              label="Count"
+              value={array.count}
+              min={1}
+              max={array.mode === 'spherical' ? 200 : 80}
+              step={1}
+              onChange={(v) => onArray({ count: v })}
+            />
+          )}
+          {isCubic && (
+            <>
+              <Slider
+                label="Count X"
+                value={array.countX}
+                min={1}
+                max={9}
+                step={1}
+                onChange={(v) => onArray({ countX: v })}
+              />
+              <Slider
+                label="Count Y"
+                value={array.countY}
+                min={1}
+                max={9}
+                step={1}
+                onChange={(v) => onArray({ countY: v })}
+              />
+              <Slider
+                label="Count Z"
+                value={array.countZ}
+                min={1}
+                max={9}
+                step={1}
+                onChange={(v) => onArray({ countZ: v })}
+              />
+            </>
+          )}
+          {showAxis && (
+            <Segmented<AxisKey>
+              label="Axis"
+              value={array.axis}
+              options={AXIS_OPTIONS}
+              onChange={(v) => onArray({ axis: v })}
+            />
+          )}
+          {showRadius && (
+            <Slider
+              label="Radius"
+              value={array.radius}
+              min={0.1}
+              max={6}
+              step={0.01}
+              onChange={(v) => onArray({ radius: v })}
+            />
+          )}
+          {showSpacing && (
+            <Slider
+              label="Spacing"
+              value={array.spacing}
+              min={0.05}
+              max={3}
+              step={0.01}
+              onChange={(v) => onArray({ spacing: v })}
+            />
+          )}
+          {isHelix && (
+            <>
+              <Slider
+                label="Turns"
+                value={array.turns}
+                min={0.25}
+                max={10}
+                step={0.05}
+                onChange={(v) => onArray({ turns: v })}
+              />
+              <Slider
+                label="Height"
+                value={array.height}
+                min={0.1}
+                max={8}
+                step={0.05}
+                onChange={(v) => onArray({ height: v })}
+              />
+            </>
+          )}
+          <Toggle
+            label="Face outward"
+            value={array.faceOutward}
+            onChange={(v) => onArray({ faceOutward: v })}
+          />
+          <Slider
+            label="Twist"
+            value={array.twist}
+            min={-Math.PI}
+            max={Math.PI}
+            step={0.01}
+            format={(v) => `${((v * 180) / Math.PI).toFixed(0)}°`}
+            onChange={(v) => onArray({ twist: v })}
+          />
+          {showFalloff && (
+            <Slider
+              label="Scale falloff"
+              value={array.scaleFalloff}
+              min={-1}
+              max={1}
+              step={0.01}
+              onChange={(v) => onArray({ scaleFalloff: v })}
+            />
+          )}
+        </>
+      )}
+
+      <SectionTitle>Anchor</SectionTitle>
+      {(['x', 'y', 'z'] as const).map((axis, i) => (
+        <Slider
+          key={axis}
+          label={axis.toUpperCase()}
+          value={anchor[i]}
+          min={-4}
+          max={4}
+          step={0.01}
+          onChange={(v) => {
+            const next: [number, number, number] = [anchor[0], anchor[1], anchor[2]];
+            next[i] = v;
+            onAnchor(next);
+          }}
+        />
+      ))}
+    </>
   );
 }
 
