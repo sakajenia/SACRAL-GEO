@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { ShapeInstance, ShapeType } from './lib/types';
 import { DEFAULT_ARRAY } from './lib/types';
 import { findCatalogEntry } from './lib/catalog';
-import { pickAccent } from './lib/colors';
+import { ACCENT_PALETTE, pickAccent } from './lib/colors';
 import { decodeStateFromUrl, encodeStateToUrl } from './lib/urlState';
 
 export interface Store {
@@ -22,6 +22,10 @@ export interface Store {
   autoRotateSpeed: number;
   globalRotationMultiplier: number;
 
+  // History
+  past: StoreSnapshot[];
+  future: StoreSnapshot[];
+
   // Actions
   addShape: (type: ShapeType) => string;
   removeShape: (id: string) => void;
@@ -31,11 +35,15 @@ export interface Store {
   reorderShape: (id: string, direction: -1 | 1) => void;
   clearScene: () => void;
   loadPreset: (preset: PresetKey) => void;
+  randomizeColors: () => void;
   setGlobal: <K extends GlobalKeys>(key: K, value: Store[K]) => void;
   syncToUrl: () => void;
   loadFromUrl: () => boolean;
   serialize: () => StoreSnapshot;
   hydrate: (snap: StoreSnapshot) => void;
+  undo: () => void;
+  redo: () => void;
+  pushHistory: () => void;
 }
 
 type GlobalKeys =
@@ -150,6 +158,8 @@ function defaultShapes(): ShapeInstance[] {
 
 const initialShapes = defaultShapes();
 
+const HISTORY_LIMIT = 30;
+
 export const useStore = create<Store>((set, get) => ({
   shapes: initialShapes,
   selectedId: initialShapes[0]?.id ?? null,
@@ -165,7 +175,38 @@ export const useStore = create<Store>((set, get) => ({
   autoRotateSpeed: 0.25,
   globalRotationMultiplier: 1,
 
+  past: [],
+  future: [],
+
+  pushHistory: () => {
+    const snap = get().serialize();
+    set((s) => {
+      const next = [...s.past, snap];
+      if (next.length > HISTORY_LIMIT) next.shift();
+      return { past: next, future: [] };
+    });
+  },
+
+  undo: () => {
+    const s = get();
+    if (s.past.length === 0) return;
+    const current = s.serialize();
+    const previous = s.past[s.past.length - 1];
+    set({ past: s.past.slice(0, -1), future: [current, ...s.future] });
+    s.hydrate(previous);
+  },
+
+  redo: () => {
+    const s = get();
+    if (s.future.length === 0) return;
+    const current = s.serialize();
+    const next = s.future[0];
+    set({ past: [...s.past, current], future: s.future.slice(1) });
+    s.hydrate(next);
+  },
+
   addShape: (type) => {
+    get().pushHistory();
     const shape = makeShape(type, get().shapes.length);
     set((s) => ({ shapes: [...s.shapes, shape], selectedId: shape.id }));
     get().syncToUrl();
@@ -173,6 +214,7 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   removeShape: (id) => {
+    get().pushHistory();
     set((s) => ({
       shapes: s.shapes.filter((x) => x.id !== id),
       selectedId: s.selectedId === id ? null : s.selectedId,
@@ -192,6 +234,7 @@ export const useStore = create<Store>((set, get) => ({
   duplicateShape: (id) => {
     const src = get().shapes.find((x) => x.id === id);
     if (!src) return;
+    get().pushHistory();
     const copy: ShapeInstance = {
       ...src,
       id: newId(),
@@ -216,13 +259,26 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   clearScene: () => {
+    get().pushHistory();
     set({ shapes: [], selectedId: null });
     get().syncToUrl();
   },
 
   loadPreset: (preset) => {
+    get().pushHistory();
     const shapes = buildPreset(preset);
     set({ shapes, selectedId: shapes[0]?.id ?? null });
+    get().syncToUrl();
+  },
+
+  randomizeColors: () => {
+    get().pushHistory();
+    set((s) => ({
+      shapes: s.shapes.map((x) => ({
+        ...x,
+        color: ACCENT_PALETTE[Math.floor(Math.random() * ACCENT_PALETTE.length)],
+      })),
+    }));
     get().syncToUrl();
   },
 

@@ -31,6 +31,8 @@ export type ArrayMode =
 
 export type AxisKey = 'x' | 'y' | 'z';
 
+export const AXES: readonly AxisKey[] = ['x', 'y', 'z'] as const;
+
 export interface ArrayConfig {
   mode: ArrayMode;
   count: number;        // total copies (>=1)

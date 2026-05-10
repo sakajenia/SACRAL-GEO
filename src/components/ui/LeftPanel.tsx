@@ -30,6 +30,7 @@ export function LeftPanel({ collapsed = false }: { collapsed?: boolean }) {
   const clearScene = useStore((s) => s.clearScene);
 
   const [tab, setTab] = useState<'add' | 'scene' | 'presets'>('scene');
+  const [search, setSearch] = useState('');
 
   return (
     <aside className={collapsed ? 'panel left collapsed' : 'panel left'}>
@@ -73,8 +74,24 @@ export function LeftPanel({ collapsed = false }: { collapsed?: boolean }) {
       <div className="panel-body">
         {tab === 'add' && (
           <div>
+            <div className="search-row">
+              <input
+                type="text"
+                placeholder="Search 19 sacred forms…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                autoFocus
+              />
+            </div>
             {CATALOG_GROUPS.map((g) => {
-              const items = CATALOG.filter((c) => c.group === g.key);
+              const items = CATALOG.filter(
+                (c) =>
+                  c.group === g.key &&
+                  (search.trim() === '' ||
+                    c.label.toLowerCase().includes(search.toLowerCase()) ||
+                    c.description.toLowerCase().includes(search.toLowerCase())),
+              );
+              if (items.length === 0) return null;
               return (
                 <div key={g.key}>
                   <div className="section-title">{g.label}</div>
@@ -87,6 +104,7 @@ export function LeftPanel({ collapsed = false }: { collapsed?: boolean }) {
                         onClick={() => {
                           addShape(c.type as ShapeType);
                           setTab('scene');
+                          setSearch('');
                         }}
                       >
                         <ShapeIcon type={c.type as ShapeType} />
