@@ -6,6 +6,27 @@ import { ACCENT_PALETTE, pickAccent } from './lib/colors';
 import { decodeStateFromUrl, encodeStateToUrl } from './lib/urlState';
 import { THEMES, type ThemeKey, applyThemeToShapes } from './lib/themes';
 import { SHAPE_DEFAULTS, GLOBAL_DEFAULTS } from './lib/defaults';
+import type { Lang } from './lib/lore';
+
+const LANG_KEY = 'sacral-geo-lang';
+
+function loadLang(): Lang {
+  try {
+    const v = localStorage.getItem(LANG_KEY);
+    if (v === 'it' || v === 'en') return v;
+  } catch {
+    /* ignore */
+  }
+  return 'en';
+}
+
+function saveLang(lang: Lang) {
+  try {
+    localStorage.setItem(LANG_KEY, lang);
+  } catch {
+    /* ignore */
+  }
+}
 
 export type TransformMode = 'off' | 'translate' | 'rotate' | 'scale';
 
@@ -55,6 +76,7 @@ export interface Store {
   themeKey: ThemeKey;
   showParticles: boolean;
   transformMode: TransformMode;
+  lang: Lang;
 
   // Persisted user presets
   customPresets: CustomPreset[];
@@ -75,6 +97,7 @@ export interface Store {
   randomizeColors: () => void;
   applyTheme: (key: ThemeKey) => void;
   setTransformMode: (m: TransformMode) => void;
+  setLang: (lang: Lang) => void;
   saveCustomPreset: (name: string) => void;
   loadCustomPreset: (id: string) => void;
   removeCustomPreset: (id: string) => void;
@@ -183,6 +206,7 @@ export const useStore = create<Store>((set, get) => ({
   ...GLOBAL_DEFAULTS,
   themeKey: 'neon',
   transformMode: 'off',
+  lang: loadLang(),
 
   customPresets: loadCustomPresets(),
 
@@ -307,6 +331,11 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   setTransformMode: (m) => set({ transformMode: m }),
+
+  setLang: (lang) => {
+    saveLang(lang);
+    set({ lang });
+  },
 
   saveCustomPreset: (name) => {
     const snap = get().serialize();

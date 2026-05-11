@@ -1,6 +1,7 @@
-import { getLore } from '../../lib/lore';
+import { getLore, type Lang } from '../../lib/lore';
 import { findCatalogEntry } from '../../lib/catalog';
 import { ShapeIcon } from './ShapeIcons';
+import { useStore } from '../../store';
 import type { ShapeType } from '../../lib/types';
 
 interface Props {
@@ -8,9 +9,13 @@ interface Props {
   onClose: () => void;
 }
 
+const CLOSE_LABEL: Record<Lang, string> = { en: 'Close', it: 'Chiudi' };
+
 export function LoreModal({ type, onClose }: Props) {
+  const lang = useStore((s) => s.lang);
+  const setLang = useStore((s) => s.setLang);
   const entry = findCatalogEntry(type);
-  const lore = getLore(type);
+  const lore = getLore(type, lang);
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -23,7 +28,27 @@ export function LoreModal({ type, onClose }: Props) {
               {lore.epigraph && <div className="lore-epigraph">{lore.epigraph}</div>}
             </div>
           </div>
-          <button className="close" onClick={onClose} aria-label="Close">✕</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div className="lang-switch" role="group" aria-label="Language">
+              <button
+                type="button"
+                className={lang === 'en' ? 'on' : ''}
+                onClick={() => setLang('en')}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                className={lang === 'it' ? 'on' : ''}
+                onClick={() => setLang('it')}
+              >
+                IT
+              </button>
+            </div>
+            <button className="close" onClick={onClose} aria-label={CLOSE_LABEL[lang]} title={CLOSE_LABEL[lang]}>
+              ✕
+            </button>
+          </div>
         </div>
         <div className="modal-body lore-body">
           {lore.sections.map((section) => (
