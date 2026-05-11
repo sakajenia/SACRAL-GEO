@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#1e1241"/>
+      <stop offset="60%" stop-color="#0a0717"/>
+      <stop offset="100%" stop-color="#05030c"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="50%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <g transform="translate(256 256)" stroke="url(#ring)" stroke-width="6" fill="none" opacity="0.95">
+    <circle r="60"/>
+    <circle r="60" cx="60" cy="0"/>
+    <circle r="60" cx="-60" cy="0"/>
+    <circle r="60" cx="30" cy="52"/>
+    <circle r="60" cx="-30" cy="52"/>
+    <circle r="60" cx="30" cy="-52"/>
+    <circle r="60" cx="-30" cy="-52"/>
+    <circle r="60" cx="120" cy="0" opacity="0.7"/>
+    <circle r="60" cx="-120" cy="0" opacity="0.7"/>
+    <circle r="60" cx="60" cy="104" opacity="0.7"/>
+    <circle r="60" cx="-60" cy="104" opacity="0.7"/>
+    <circle r="60" cx="60" cy="-104" opacity="0.7"/>
+    <circle r="60" cx="-60" cy="-104" opacity="0.7"/>
+  </g>
+</svg>
