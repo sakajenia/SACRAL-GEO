@@ -410,6 +410,29 @@ select {
   text-align: right;
 }
 
+.num-input {
+  width: 44px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 2px 4px;
+  text-align: right;
+  cursor: text;
+  transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease;
+}
+
+.num-input:hover {
+  border-color: rgba(167, 139, 250, 0.25);
+  color: var(--text);
+}
+
+.num-input:focus {
+  border-color: rgba(167, 139, 250, 0.55);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  outline: none;
+}
+
 .field input[type='text'],
 .field input[type='number'],
 .field select {
@@ -441,12 +464,26 @@ select {
 .field select {
   appearance: none;
   -webkit-appearance: none;
+  background-color: rgba(14, 9, 30, 0.92);
   background-image: linear-gradient(45deg, transparent 50%, var(--text-dim) 50%),
     linear-gradient(135deg, var(--text-dim) 50%, transparent 50%);
   background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
   background-size: 5px 5px;
   background-repeat: no-repeat;
   padding-right: 24px;
+  color: var(--text);
+}
+
+.field select option,
+select option {
+  background: #14092a;
+  color: var(--text);
+}
+
+.field select:focus option:checked,
+select option:hover {
+  background: rgba(167, 139, 250, 0.25);
+  color: var(--text);
 }
 
 .segmented {
@@ -765,6 +802,50 @@ select {
 
 .tip-list li {
   margin-bottom: 4px;
+}
+
+/* ---------- Lore modal ---------- */
+.lore-modal {
+  width: min(720px, 92vw);
+  max-height: 85vh;
+}
+
+.lore-epigraph {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--text-faint);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+.lore-body {
+  padding: 18px 24px 24px;
+}
+
+.lore-section {
+  margin-bottom: 18px;
+}
+
+.lore-section:last-child {
+  margin-bottom: 0;
+}
+
+.lore-section h4 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.lore-section p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text);
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 /* ---------- Catalog search ---------- */

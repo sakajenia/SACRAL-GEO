@@ -36,7 +36,6 @@ export function RightPanel({ toast, collapsed = false }: RightPanelProps) {
 
   useEffect(() => {
     if (!selected && tab !== 'view') setTab('view');
-    if (selected && tab === 'view') setTab('transform');
   }, [selected, tab]);
 
   const tabs: { key: Tab; label: string; enabled: boolean }[] = [
@@ -156,23 +155,36 @@ function TransformTab({
       ))}
 
       <SectionTitle>Spin · °/sec</SectionTitle>
-      {AXES.map((axis, i) => (
-        <Slider
-          key={axis}
-          label={axis.toUpperCase()}
-          value={shape.rotationSpeed[i] * RAD2DEG}
-          defaultValue={SHAPE_DEFAULTS.rotationSpeed[i] * RAD2DEG}
-          min={-360}
-          max={360}
-          step={1}
-          format={(v) => `${v.toFixed(0)}°/s`}
-          onChange={(v) => {
-            const next = [...shape.rotationSpeed] as [number, number, number];
-            next[i] = v * DEG2RAD;
-            onChange({ rotationSpeed: next });
-          }}
-        />
-      ))}
+      <Toggle
+        label="Spin enabled"
+        value={shape.spinEnabled}
+        defaultValue={SHAPE_DEFAULTS.spinEnabled}
+        onChange={(v) => {
+          if (v && shape.rotationSpeed.every((r) => r === 0)) {
+            onChange({ spinEnabled: true, rotationSpeed: [0, (30 * Math.PI) / 180, 0] });
+          } else {
+            onChange({ spinEnabled: v });
+          }
+        }}
+      />
+      {shape.spinEnabled &&
+        AXES.map((axis, i) => (
+          <Slider
+            key={axis}
+            label={axis.toUpperCase()}
+            value={shape.rotationSpeed[i] * RAD2DEG}
+            defaultValue={SHAPE_DEFAULTS.rotationSpeed[i] * RAD2DEG}
+            min={-360}
+            max={360}
+            step={1}
+            format={(v) => `${v.toFixed(0)}°/s`}
+            onChange={(v) => {
+              const next = [...shape.rotationSpeed] as [number, number, number];
+              next[i] = v * DEG2RAD;
+              onChange({ rotationSpeed: next });
+            }}
+          />
+        ))}
 
       <SectionTitle>Scale &amp; breath</SectionTitle>
       <Slider

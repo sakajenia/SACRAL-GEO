@@ -165,20 +165,11 @@ function normalizeShape(s: Partial<ShapeInstance> & { id: string; type: ShapeTyp
 }
 
 function defaultShapes(): ShapeInstance[] {
-  // Out-of-the-box: a Merkaba inside a Flower of Life — instantly evocative
   const flower = makeShape('flowerOfLife', 0);
   flower.color = '#a78bfa';
-  flower.rotationSpeed = [0, 0.05, 0];
   flower.scale = 1.4;
   flower.opacity = 0.9;
-
-  const merkaba = makeShape('merkaba', 1);
-  merkaba.color = '#06b6d4';
-  merkaba.rotationSpeed = [0.25, -0.4, 0.1];
-  merkaba.scale = 0.8;
-  merkaba.emissive = 1.8;
-
-  return [flower, merkaba];
+  return [flower];
 }
 
 const initialShapes = defaultShapes();

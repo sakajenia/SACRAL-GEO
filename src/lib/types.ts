@@ -65,6 +65,7 @@ export interface ShapeInstance {
   rotation: [number, number, number];
   rotationSpeed: [number, number, number];
   scale: number;
+  spinEnabled: boolean;
   pulseAmplitude: number;
   pulseSpeed: number;
   breathing: boolean;

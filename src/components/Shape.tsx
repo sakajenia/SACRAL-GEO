@@ -128,16 +128,16 @@ export function Shape({ shape }: Props) {
 
   useFrame((_, delta) => {
     const mul = useStore.getState().globalRotationMultiplier;
-    const dx = shape.rotationSpeed[0] * delta * mul;
-    const dy = shape.rotationSpeed[1] * delta * mul;
-    const dz = shape.rotationSpeed[2] * delta * mul;
+    const dx = shape.spinEnabled ? shape.rotationSpeed[0] * delta * mul : 0;
+    const dy = shape.spinEnabled ? shape.rotationSpeed[1] * delta * mul : 0;
+    const dz = shape.spinEnabled ? shape.rotationSpeed[2] * delta * mul : 0;
     const hasAnim = shape.pulseAmplitude > 0 || shape.breathing;
     const t = hasAnim ? performance.now() / 1000 : 0;
 
     const N = items.length;
     for (let i = 0; i < N; i++) {
       const spin = spinRefs.current[i];
-      if (spin) {
+      if (spin && shape.spinEnabled) {
         spin.rotation.x += dx;
         spin.rotation.y += dy;
         spin.rotation.z += dz;

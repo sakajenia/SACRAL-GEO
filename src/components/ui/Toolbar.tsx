@@ -7,6 +7,7 @@ import type { TransformMode } from '../../store';
 interface ToolbarProps {
   toast: (msg: string) => void;
   onHelp: () => void;
+  onLore: () => void;
 }
 
 const TRANSFORM_BUTTONS: { mode: TransformMode; label: string; title: string; glyph: string }[] = [
@@ -15,7 +16,7 @@ const TRANSFORM_BUTTONS: { mode: TransformMode; label: string; title: string; gl
   { mode: 'scale', label: 'Size', title: 'Scale gizmo (S)', glyph: '⤡' },
 ];
 
-export function Toolbar({ toast, onHelp }: ToolbarProps) {
+export function Toolbar({ toast, onHelp, onLore }: ToolbarProps) {
   const undo = useStore((s) => s.undo);
   const redo = useStore((s) => s.redo);
   const canUndo = useStore((s) => s.past.length > 0);
@@ -203,6 +204,14 @@ export function Toolbar({ toast, onHelp }: ToolbarProps) {
 
       <span className="tb-divider" />
 
+      <button
+        className="tb-btn"
+        title="Origin & meaning of the selected shape (I)"
+        onClick={onLore}
+        disabled={!selectedId}
+      >
+        𓂀
+      </button>
       <button className="tb-btn" title="Keyboard shortcuts (?)" onClick={onHelp}>
         ?
       </button>

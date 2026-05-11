@@ -11,6 +11,7 @@ const SHORTCUTS: { keys: string; desc: string }[] = [
   { keys: 'M', desc: 'Toggle meditation orbit' },
   { keys: '[  /  ]', desc: 'Toggle left / right panels' },
   { keys: '?', desc: 'Toggle this help overlay' },
+  { keys: 'I', desc: 'Open the lore / origin of the selected shape' },
   { keys: 'click in 3D', desc: 'Select that shape' },
   { keys: 'drag canvas', desc: 'Orbit camera' },
   { keys: 'scroll', desc: 'Zoom' },

@@ -3,8 +3,9 @@ import type { ShapeInstance } from './types';
 export const SHAPE_DEFAULTS: Omit<ShapeInstance, 'id' | 'type' | 'name' | 'visible' | 'color' | 'array'> = {
   position: [0, 0, 0],
   rotation: [0, 0, 0],
-  rotationSpeed: [0, 0.2, 0],
+  rotationSpeed: [0, 0, 0],
   scale: 1,
+  spinEnabled: false,
   pulseAmplitude: 0,
   pulseSpeed: 0.5,
   breathing: false,

@@ -1,4 +1,4 @@
-import { memo, useId } from 'react';
+import { memo, useEffect, useId, useState } from 'react';
 
 const ResetButton = memo(function ResetButton({
   canReset,
@@ -36,10 +36,28 @@ interface SliderProps {
 
 export function Slider({ label, value, min, max, step = 0.01, format, defaultValue, onChange }: SliderProps) {
   const id = useId();
-  const display = format ? format(value) : value.toFixed(step >= 1 ? 0 : 2);
+  const decimals = step >= 1 ? 0 : 2;
+  const display = format ? format(value) : value.toFixed(decimals);
   const tol = Math.max(step * 0.5, 1e-6);
   const canReset = defaultValue !== undefined && Math.abs(value - defaultValue) > tol;
   const reset = () => defaultValue !== undefined && onChange(defaultValue);
+
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(display);
+
+  useEffect(() => {
+    if (!editing) setDraft(display);
+  }, [display, editing]);
+
+  const commit = (txt: string) => {
+    const match = txt.replace(',', '.').match(/-?\d+(\.\d+)?/);
+    if (match) {
+      const n = parseFloat(match[0]);
+      if (!Number.isNaN(n)) onChange(Math.max(min, Math.min(max, n)));
+    }
+    setEditing(false);
+  };
+
   return (
     <div className="field">
       <div className="field-row">
@@ -54,7 +72,26 @@ export function Slider({ label, value, min, max, step = 0.01, format, defaultVal
           onChange={(e) => onChange(Number(e.target.value))}
           onDoubleClick={reset}
         />
-        <span className="num">{display}</span>
+        <input
+          type="text"
+          className="num num-input"
+          value={editing ? draft : display}
+          onFocus={() => {
+            setDraft(format ? String(Number(value.toFixed(decimals))) : value.toFixed(decimals));
+            setEditing(true);
+          }}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={(e) => commit(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+            if (e.key === 'Escape') {
+              setEditing(false);
+              setDraft(display);
+            }
+          }}
+          inputMode="decimal"
+          spellCheck={false}
+        />
         <ResetButton
           canReset={canReset}
           onReset={reset}

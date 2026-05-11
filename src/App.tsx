@@ -4,6 +4,7 @@ import { LeftPanel } from './components/ui/LeftPanel';
 import { RightPanel } from './components/ui/RightPanel';
 import { Toolbar } from './components/ui/Toolbar';
 import { HelpOverlay } from './components/ui/HelpOverlay';
+import { LoreModal } from './components/ui/LoreModal';
 import { useStore } from './store';
 
 const ONBOARD_KEY = 'sacral-geo-onboarded-v2';
@@ -20,6 +21,9 @@ export function App() {
   const setTransformMode = useStore((s) => s.setTransformMode);
 
   const [helpOpen, setHelpOpen] = useState(false);
+  const [loreOpen, setLoreOpen] = useState(false);
+  const shapes = useStore((s) => s.shapes);
+  const selectedShape = shapes.find((s) => s.id === selectedId);
 
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<number | null>(null);
@@ -93,6 +97,9 @@ export function App() {
       if (e.key === '?') {
         setHelpOpen((v) => !v);
       }
+      if (e.key === 'i' || e.key === 'I') {
+        if (selectedId) setLoreOpen((v) => !v);
+      }
       if (e.key === 't' || e.key === 'T') {
         if (selectedId) setTransformMode(useStore.getState().transformMode === 'translate' ? 'off' : 'translate');
       }
@@ -105,6 +112,7 @@ export function App() {
       if (e.key === 'Escape') {
         setTransformMode('off');
         setHelpOpen(false);
+        setLoreOpen(false);
       }
     }
     window.addEventListener('keydown', onKey);
@@ -124,7 +132,11 @@ export function App() {
       <div className="canvas-wrap">
         <Scene />
 
-        <Toolbar toast={showToast} onHelp={() => setHelpOpen((v) => !v)} />
+        <Toolbar
+          toast={showToast}
+          onHelp={() => setHelpOpen((v) => !v)}
+          onLore={() => setLoreOpen((v) => !v)}
+        />
 
         <button
           className="mobile-toggle left"
@@ -164,6 +176,9 @@ export function App() {
         {toastMsg && <div className="toast">{toastMsg}</div>}
 
         {helpOpen && <HelpOverlay onClose={() => setHelpOpen(false)} />}
+        {loreOpen && selectedShape && (
+          <LoreModal type={selectedShape.type} onClose={() => setLoreOpen(false)} />
+        )}
       </div>
 
       <RightPanel toast={showToast} collapsed={rightCollapsed} />
