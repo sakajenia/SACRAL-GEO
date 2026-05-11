@@ -1,4 +1,27 @@
-import { useId } from 'react';
+import { memo, useId } from 'react';
+
+const ResetButton = memo(function ResetButton({
+  canReset,
+  onReset,
+  title,
+}: {
+  canReset: boolean;
+  onReset: () => void;
+  title?: string;
+}) {
+  return (
+    <button
+      type="button"
+      className={canReset ? 'reset-btn on' : 'reset-btn'}
+      title={title ?? (canReset ? 'Reset to default' : 'Already at default')}
+      aria-label="Reset"
+      disabled={!canReset}
+      onClick={onReset}
+    >
+      ↺
+    </button>
+  );
+});
 
 interface SliderProps {
   label: string;
@@ -7,12 +30,16 @@ interface SliderProps {
   max: number;
   step?: number;
   format?: (v: number) => string;
+  defaultValue?: number;
   onChange: (v: number) => void;
 }
 
-export function Slider({ label, value, min, max, step = 0.01, format, onChange }: SliderProps) {
+export function Slider({ label, value, min, max, step = 0.01, format, defaultValue, onChange }: SliderProps) {
   const id = useId();
   const display = format ? format(value) : value.toFixed(step >= 1 ? 0 : 2);
+  const tol = Math.max(step * 0.5, 1e-6);
+  const canReset = defaultValue !== undefined && Math.abs(value - defaultValue) > tol;
+  const reset = () => defaultValue !== undefined && onChange(defaultValue);
   return (
     <div className="field">
       <div className="field-row">
@@ -25,8 +52,14 @@ export function Slider({ label, value, min, max, step = 0.01, format, onChange }
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
+          onDoubleClick={reset}
         />
         <span className="num">{display}</span>
+        <ResetButton
+          canReset={canReset}
+          onReset={reset}
+          title={canReset ? `Reset to ${format ? format(defaultValue!) : defaultValue}` : undefined}
+        />
       </div>
     </div>
   );
@@ -35,14 +68,22 @@ export function Slider({ label, value, min, max, step = 0.01, format, onChange }
 interface ToggleProps {
   label: string;
   value: boolean;
+  defaultValue?: boolean;
   onChange: (v: boolean) => void;
 }
 
-export function Toggle({ label, value, onChange }: ToggleProps) {
+export function Toggle({ label, value, defaultValue, onChange }: ToggleProps) {
+  const canReset = defaultValue !== undefined && value !== defaultValue;
   return (
-    <div className="toggle-row" onClick={() => onChange(!value)} role="button">
-      <label>{label}</label>
-      <span className={value ? 'toggle on' : 'toggle'} aria-pressed={value} />
+    <div className="toggle-row">
+      <label onClick={() => onChange(!value)}>{label}</label>
+      <ResetButton canReset={canReset} onReset={() => defaultValue !== undefined && onChange(defaultValue)} />
+      <span
+        className={value ? 'toggle on' : 'toggle'}
+        aria-pressed={value}
+        role="button"
+        onClick={() => onChange(!value)}
+      />
     </div>
   );
 }
@@ -50,13 +91,18 @@ export function Toggle({ label, value, onChange }: ToggleProps) {
 interface ColorFieldProps {
   label: string;
   value: string;
+  defaultValue?: string;
   onChange: (v: string) => void;
 }
 
-export function ColorField({ label, value, onChange }: ColorFieldProps) {
+export function ColorField({ label, value, defaultValue, onChange }: ColorFieldProps) {
+  const canReset = defaultValue !== undefined && value.toLowerCase() !== defaultValue.toLowerCase();
   return (
     <div className="field">
-      <label style={{ marginBottom: 4 }}>{label}</label>
+      <div className="field-header">
+        <label>{label}</label>
+        <ResetButton canReset={canReset} onReset={() => defaultValue !== undefined && onChange(defaultValue)} />
+      </div>
       <input type="color" value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   );

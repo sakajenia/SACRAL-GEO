@@ -320,9 +320,46 @@ select {
 
 .field-row {
   display: grid;
-  grid-template-columns: 70px 1fr 44px;
+  grid-template-columns: 64px 1fr 44px 16px;
   align-items: center;
   gap: 8px;
+}
+
+.reset-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 11px;
+  line-height: 1;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-faint);
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.12s ease, color 0.12s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.field:hover .reset-btn,
+.toggle-row:hover .reset-btn,
+.field:focus-within .reset-btn {
+  opacity: 0.4;
+}
+
+.reset-btn.on {
+  opacity: 1;
+  color: var(--accent);
+}
+
+.reset-btn:hover:not(:disabled) {
+  background: rgba(167, 139, 250, 0.18);
+  color: var(--text);
+}
+
+.reset-btn:disabled {
+  cursor: default;
 }
 
 .field label {
@@ -809,9 +846,10 @@ select {
 }
 
 .toggle-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 16px 32px;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   padding: 4px 0;
   margin-bottom: 6px;
 }
@@ -819,6 +857,14 @@ select {
 .toggle-row label {
   font-size: 12px;
   color: var(--text-dim);
+  cursor: pointer;
+}
+
+.field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
 }
 
 .toggle {

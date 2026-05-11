@@ -5,6 +5,7 @@ import { findCatalogEntry } from './lib/catalog';
 import { ACCENT_PALETTE, pickAccent } from './lib/colors';
 import { decodeStateFromUrl, encodeStateToUrl } from './lib/urlState';
 import { THEMES, type ThemeKey, applyThemeToShapes } from './lib/themes';
+import { SHAPE_DEFAULTS, GLOBAL_DEFAULTS } from './lib/defaults';
 
 export type TransformMode = 'off' | 'translate' | 'rotate' | 'scale';
 
@@ -134,53 +135,31 @@ const newId = () => `s_${Date.now().toString(36)}_${(idCounter++).toString(36)}`
 function makeShape(type: ShapeType, index: number): ShapeInstance {
   const entry = findCatalogEntry(type);
   const base: ShapeInstance = {
+    ...SHAPE_DEFAULTS,
     id: newId(),
     type,
     name: entry.label,
     visible: true,
-    position: [0, 0, 0],
-    rotation: [0, 0, 0],
-    rotationSpeed: [0, 0.2, 0],
-    scale: 1,
-    pulseAmplitude: 0,
-    pulseSpeed: 0.5,
-    breathing: false,
     color: pickAccent(index),
-    emissive: 1.6,
-    wireframe: true,
-    opacity: 1,
-    materialMode: 'wireframe',
-    detail: 0,
-    thickness: 0.012,
-    showVertices: false,
-    anchor: [0, 0, 0],
     array: { ...DEFAULT_ARRAY },
   };
   return { ...base, ...entry.defaults } as ShapeInstance;
 }
 
+function resolveMaterialMode(s: Partial<ShapeInstance>): MaterialMode {
+  if (s.materialMode) return s.materialMode;
+  // v1 URLs only had `wireframe: boolean` — bridge to the new MaterialMode union.
+  return s.wireframe === false ? 'solid' : 'wireframe';
+}
+
 function normalizeShape(s: Partial<ShapeInstance> & { id: string; type: ShapeType }): ShapeInstance {
   return {
-    id: s.id,
-    type: s.type,
-    name: s.name ?? findCatalogEntry(s.type).label,
-    visible: s.visible ?? true,
-    position: s.position ?? [0, 0, 0],
-    rotation: s.rotation ?? [0, 0, 0],
-    rotationSpeed: s.rotationSpeed ?? [0, 0.2, 0],
-    scale: s.scale ?? 1,
-    pulseAmplitude: s.pulseAmplitude ?? 0,
-    pulseSpeed: s.pulseSpeed ?? 0.5,
-    breathing: s.breathing ?? false,
-    color: s.color ?? '#a78bfa',
-    emissive: s.emissive ?? 1.6,
-    wireframe: s.wireframe ?? true,
-    materialMode: (s.materialMode ?? (s.wireframe === false ? 'solid' : 'wireframe')) as MaterialMode,
-    opacity: s.opacity ?? 1,
-    detail: s.detail ?? 0,
-    thickness: s.thickness ?? 0.012,
-    showVertices: s.showVertices ?? false,
-    anchor: s.anchor ?? [0, 0, 0],
+    ...SHAPE_DEFAULTS,
+    name: findCatalogEntry(s.type).label,
+    visible: true,
+    color: '#a78bfa',
+    ...s,
+    materialMode: resolveMaterialMode(s),
     array: { ...DEFAULT_ARRAY, ...(s.array ?? {}) },
   };
 }
@@ -210,18 +189,8 @@ export const useStore = create<Store>((set, get) => ({
   shapes: initialShapes,
   selectedId: initialShapes[0]?.id ?? null,
 
-  bloomIntensity: 1.4,
-  bloomRadius: 0.7,
-  background: '#05030c',
-  showStars: true,
-  showAxes: false,
-  showGoldenRatio: false,
-  meditationMode: false,
-  cameraDistance: 5.5,
-  autoRotateSpeed: 0.25,
-  globalRotationMultiplier: 1,
+  ...GLOBAL_DEFAULTS,
   themeKey: 'neon',
-  showParticles: true,
   transformMode: 'off',
 
   customPresets: loadCustomPresets(),

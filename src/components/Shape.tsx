@@ -118,9 +118,8 @@ export function Shape({ shape }: Props) {
     return all.length > ARRAY_HARD_CAP ? all.slice(0, ARRAY_HARD_CAP) : all;
   }, [shape.array]);
 
-  const selectedId = useStore((s) => s.selectedId);
   const selectShape = useStore((s) => s.selectShape);
-  const isSelected = selectedId === shape.id;
+  const showSelectionRing = useStore((s) => s.selectedId === shape.id && s.transformMode !== 'off');
 
   const onSelect = useCallback(() => selectShape(shape.id), [shape.id, selectShape]);
 
@@ -174,14 +173,14 @@ export function Shape({ shape }: Props) {
   return (
     <group position={shape.position} userData={{ shapeId: shape.id }}>
       <group position={shape.anchor}>
-        {isSelected && (
+        {showSelectionRing && (
           <mesh>
             <sphereGeometry args={[selectionRadius + 0.05, 24, 24]} />
             <meshBasicMaterial
               color="#a78bfa"
               wireframe
               transparent
-              opacity={0.08}
+              opacity={0.1}
               toneMapped={false}
             />
           </mesh>

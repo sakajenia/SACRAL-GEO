@@ -5,7 +5,8 @@ import { Slider, Toggle, ColorField, SectionTitle, SelectField, Segmented } from
 import { ShapeIcon } from './ShapeIcons';
 import { findCatalogEntry } from '../../lib/catalog';
 import type { ShapeInstance, ArrayMode, AxisKey, ArrayConfig, MaterialMode } from '../../lib/types';
-import { AXES } from '../../lib/types';
+import { AXES, DEFAULT_ARRAY } from '../../lib/types';
+import { SHAPE_DEFAULTS, GLOBAL_DEFAULTS } from '../../lib/defaults';
 import { exportPng, copyShareLink } from '../../lib/exports';
 import { computeArray } from '../../lib/array';
 
@@ -123,6 +124,7 @@ function TransformTab({
           key={axis}
           label={axis.toUpperCase()}
           value={shape.position[i]}
+          defaultValue={SHAPE_DEFAULTS.position[i]}
           min={-4}
           max={4}
           step={0.01}
@@ -140,6 +142,7 @@ function TransformTab({
           key={axis}
           label={axis.toUpperCase()}
           value={shape.rotation[i] * RAD2DEG}
+          defaultValue={SHAPE_DEFAULTS.rotation[i] * RAD2DEG}
           min={-360}
           max={360}
           step={1}
@@ -158,6 +161,7 @@ function TransformTab({
           key={axis}
           label={axis.toUpperCase()}
           value={shape.rotationSpeed[i] * RAD2DEG}
+          defaultValue={SHAPE_DEFAULTS.rotationSpeed[i] * RAD2DEG}
           min={-360}
           max={360}
           step={1}
@@ -174,6 +178,7 @@ function TransformTab({
       <Slider
         label="Scale"
         value={shape.scale}
+        defaultValue={SHAPE_DEFAULTS.scale}
         min={0.05}
         max={4}
         step={0.01}
@@ -182,6 +187,7 @@ function TransformTab({
       <Slider
         label="Pulse amp"
         value={shape.pulseAmplitude}
+        defaultValue={SHAPE_DEFAULTS.pulseAmplitude}
         min={0}
         max={0.5}
         step={0.005}
@@ -191,6 +197,7 @@ function TransformTab({
         <Slider
           label="Pulse Hz"
           value={shape.pulseSpeed}
+          defaultValue={SHAPE_DEFAULTS.pulseSpeed}
           min={0.05}
           max={4}
           step={0.01}
@@ -200,6 +207,7 @@ function TransformTab({
       <Toggle
         label="Slow breath"
         value={shape.breathing}
+        defaultValue={SHAPE_DEFAULTS.breathing}
         onChange={(v) => onChange({ breathing: v })}
       />
     </>
@@ -249,15 +257,15 @@ function MaterialTab({
           onChange={(v) => onChange({ materialMode: v, wireframe: v === 'wireframe' })}
         />
       )}
-      <Slider label="Glow" value={shape.emissive} min={0} max={4} step={0.05} onChange={(v) => onChange({ emissive: v })} />
-      <Slider label="Opacity" value={shape.opacity} min={0.05} max={1} step={0.01} onChange={(v) => onChange({ opacity: v })} />
+      <Slider label="Glow" value={shape.emissive} defaultValue={SHAPE_DEFAULTS.emissive} min={0} max={4} step={0.05} onChange={(v) => onChange({ emissive: v })} />
+      <Slider label="Opacity" value={shape.opacity} defaultValue={SHAPE_DEFAULTS.opacity} min={0.05} max={1} step={0.01} onChange={(v) => onChange({ opacity: v })} />
       {caps.thickness && (
-        <Slider label="Line thickness" value={shape.thickness} min={0.003} max={0.06} step={0.001} onChange={(v) => onChange({ thickness: v })} />
+        <Slider label="Line thickness" value={shape.thickness} defaultValue={SHAPE_DEFAULTS.thickness} min={0.003} max={0.06} step={0.001} onChange={(v) => onChange({ thickness: v })} />
       )}
       {caps.detail && (
-        <Slider label="Detail" value={shape.detail} min={0} max={4} step={1} onChange={(v) => onChange({ detail: v })} />
+        <Slider label="Detail" value={shape.detail} defaultValue={SHAPE_DEFAULTS.detail} min={0} max={4} step={1} onChange={(v) => onChange({ detail: v })} />
       )}
-      <Toggle label="Mark vertices" value={shape.showVertices} onChange={(v) => onChange({ showVertices: v })} />
+      <Toggle label="Mark vertices" value={shape.showVertices} defaultValue={SHAPE_DEFAULTS.showVertices} onChange={(v) => onChange({ showVertices: v })} />
     </>
   );
 }
@@ -329,6 +337,7 @@ function RepeatTab({
             <Slider
               label="Count"
               value={array.count}
+              defaultValue={DEFAULT_ARRAY.count}
               min={1}
               max={array.mode === 'spherical' ? 200 : 100}
               step={1}
@@ -337,9 +346,9 @@ function RepeatTab({
           )}
           {isCubic && (
             <>
-              <Slider label="Count X" value={array.countX} min={1} max={9} step={1} onChange={(v) => onArray({ countX: v })} />
-              <Slider label="Count Y" value={array.countY} min={1} max={9} step={1} onChange={(v) => onArray({ countY: v })} />
-              <Slider label="Count Z" value={array.countZ} min={1} max={9} step={1} onChange={(v) => onArray({ countZ: v })} />
+              <Slider label="Count X" value={array.countX} defaultValue={DEFAULT_ARRAY.countX} min={1} max={9} step={1} onChange={(v) => onArray({ countX: v })} />
+              <Slider label="Count Y" value={array.countY} defaultValue={DEFAULT_ARRAY.countY} min={1} max={9} step={1} onChange={(v) => onArray({ countY: v })} />
+              <Slider label="Count Z" value={array.countZ} defaultValue={DEFAULT_ARRAY.countZ} min={1} max={9} step={1} onChange={(v) => onArray({ countZ: v })} />
             </>
           )}
           {showAxis && (
@@ -351,21 +360,22 @@ function RepeatTab({
             />
           )}
           {showRadius && (
-            <Slider label="Radius" value={array.radius} min={0.1} max={6} step={0.01} onChange={(v) => onArray({ radius: v })} />
+            <Slider label="Radius" value={array.radius} defaultValue={DEFAULT_ARRAY.radius} min={0.1} max={6} step={0.01} onChange={(v) => onArray({ radius: v })} />
           )}
           {showSpacing && (
-            <Slider label="Spacing" value={array.spacing} min={0.05} max={3} step={0.01} onChange={(v) => onArray({ spacing: v })} />
+            <Slider label="Spacing" value={array.spacing} defaultValue={DEFAULT_ARRAY.spacing} min={0.05} max={3} step={0.01} onChange={(v) => onArray({ spacing: v })} />
           )}
           {isHelix && (
             <>
-              <Slider label="Turns" value={array.turns} min={0.25} max={10} step={0.05} onChange={(v) => onArray({ turns: v })} />
-              <Slider label="Height" value={array.height} min={0.1} max={8} step={0.05} onChange={(v) => onArray({ height: v })} />
+              <Slider label="Turns" value={array.turns} defaultValue={DEFAULT_ARRAY.turns} min={0.25} max={10} step={0.05} onChange={(v) => onArray({ turns: v })} />
+              <Slider label="Height" value={array.height} defaultValue={DEFAULT_ARRAY.height} min={0.1} max={8} step={0.05} onChange={(v) => onArray({ height: v })} />
             </>
           )}
           {isRevolve && (
             <Slider
               label="Sweep"
               value={array.sweep * RAD2DEG}
+              defaultValue={DEFAULT_ARRAY.sweep * RAD2DEG}
               min={5}
               max={360}
               step={1}
@@ -374,11 +384,12 @@ function RepeatTab({
             />
           )}
           {!isRevolve && (
-            <Toggle label="Face outward" value={array.faceOutward} onChange={(v) => onArray({ faceOutward: v })} />
+            <Toggle label="Face outward" value={array.faceOutward} defaultValue={DEFAULT_ARRAY.faceOutward} onChange={(v) => onArray({ faceOutward: v })} />
           )}
           <Slider
             label="Twist / copy"
             value={array.twist * RAD2DEG}
+            defaultValue={DEFAULT_ARRAY.twist * RAD2DEG}
             min={-180}
             max={180}
             step={1}
@@ -386,7 +397,7 @@ function RepeatTab({
             onChange={(v) => onArray({ twist: v * DEG2RAD })}
           />
           {showFalloff && (
-            <Slider label="Scale falloff" value={array.scaleFalloff} min={-1} max={1} step={0.01} onChange={(v) => onArray({ scaleFalloff: v })} />
+            <Slider label="Scale falloff" value={array.scaleFalloff} defaultValue={DEFAULT_ARRAY.scaleFalloff} min={-1} max={1} step={0.01} onChange={(v) => onArray({ scaleFalloff: v })} />
           )}
         </>
       )}
@@ -398,6 +409,7 @@ function RepeatTab({
           key={axis}
           label={axis.toUpperCase()}
           value={anchor[i]}
+          defaultValue={SHAPE_DEFAULTS.anchor[i]}
           min={-4}
           max={4}
           step={0.01}
@@ -431,20 +443,20 @@ function ViewTab({ toast }: { toast: ToastSetter }) {
   return (
     <>
       <SectionTitle>Camera &amp; field</SectionTitle>
-      <Slider label="Distance" value={cameraDistance} min={1.5} max={14} step={0.05} onChange={(v) => setGlobal('cameraDistance', v)} />
-      <Slider label="Spin mult" value={globalRotationMultiplier} min={0} max={3} step={0.01} onChange={(v) => setGlobal('globalRotationMultiplier', v)} />
-      <Toggle label="Meditation orbit" value={meditationMode} onChange={(v) => setGlobal('meditationMode', v)} />
+      <Slider label="Distance" value={cameraDistance} defaultValue={GLOBAL_DEFAULTS.cameraDistance} min={1.5} max={14} step={0.05} onChange={(v) => setGlobal('cameraDistance', v)} />
+      <Slider label="Spin mult" value={globalRotationMultiplier} defaultValue={GLOBAL_DEFAULTS.globalRotationMultiplier} min={0} max={3} step={0.01} onChange={(v) => setGlobal('globalRotationMultiplier', v)} />
+      <Toggle label="Meditation orbit" value={meditationMode} defaultValue={GLOBAL_DEFAULTS.meditationMode} onChange={(v) => setGlobal('meditationMode', v)} />
       {meditationMode && (
-        <Slider label="Orbit speed" value={autoRotateSpeed} min={0.02} max={1.2} step={0.01} onChange={(v) => setGlobal('autoRotateSpeed', v)} />
+        <Slider label="Orbit speed" value={autoRotateSpeed} defaultValue={GLOBAL_DEFAULTS.autoRotateSpeed} min={0.02} max={1.2} step={0.01} onChange={(v) => setGlobal('autoRotateSpeed', v)} />
       )}
 
       <SectionTitle>Atmosphere</SectionTitle>
-      <ColorField label="Background" value={background} onChange={(v) => setGlobal('background', v)} />
-      <Slider label="Bloom" value={bloomIntensity} min={0} max={3} step={0.01} onChange={(v) => setGlobal('bloomIntensity', v)} />
-      <Slider label="Bloom radius" value={bloomRadius} min={0} max={1.5} step={0.01} onChange={(v) => setGlobal('bloomRadius', v)} />
-      <Toggle label="Stars" value={showStars} onChange={(v) => setGlobal('showStars', v)} />
-      <Toggle label="Axes" value={showAxes} onChange={(v) => setGlobal('showAxes', v)} />
-      <Toggle label="Golden-ratio overlay" value={showGoldenRatio} onChange={(v) => setGlobal('showGoldenRatio', v)} />
+      <ColorField label="Background" value={background} defaultValue={GLOBAL_DEFAULTS.background} onChange={(v) => setGlobal('background', v)} />
+      <Slider label="Bloom" value={bloomIntensity} defaultValue={GLOBAL_DEFAULTS.bloomIntensity} min={0} max={3} step={0.01} onChange={(v) => setGlobal('bloomIntensity', v)} />
+      <Slider label="Bloom radius" value={bloomRadius} defaultValue={GLOBAL_DEFAULTS.bloomRadius} min={0} max={1.5} step={0.01} onChange={(v) => setGlobal('bloomRadius', v)} />
+      <Toggle label="Stars" value={showStars} defaultValue={GLOBAL_DEFAULTS.showStars} onChange={(v) => setGlobal('showStars', v)} />
+      <Toggle label="Axes" value={showAxes} defaultValue={GLOBAL_DEFAULTS.showAxes} onChange={(v) => setGlobal('showAxes', v)} />
+      <Toggle label="Golden-ratio overlay" value={showGoldenRatio} defaultValue={GLOBAL_DEFAULTS.showGoldenRatio} onChange={(v) => setGlobal('showGoldenRatio', v)} />
 
       <SectionTitle>Output</SectionTitle>
       <div className="btn-row">
